@@ -1,15 +1,15 @@
-const mongoose=require("mongoose");
-const DB=process.env.DB_URL;
-const connectDB=async()=>{
-    try {
-        mongoose.connect(DB);
-        console.log("Database connected");
-        
-        
-    } catch (error) {
-        console.log(error);
-        return error.message
-        
-    }
-}
-connectDB();
+import mongoose from "mongoose";
+
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.DBURL);
+    console.log("Database connected");
+  } catch (error) {
+    console.error("Database connection error:", error.message);
+    return error.message;
+  }
+};
+
+
+export default connectDB;
