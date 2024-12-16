@@ -6,7 +6,8 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as OAuth2Strategy } from "passport-google-oauth2";
 import connectDB from "./db/connection.js"; // Assuming this initializes your MongoDB connection
-import userDB from "./modal/user.schema.js"; // User schema
+import userDB from "./models/user.schema.js";
+import postsRoutes from "./routes/Posts.routes.js"
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use(
 app.use(express.json());
 connectDB();
 
+app.use("/feed",postsRoutes);
 
 // Setup session
 app.use(

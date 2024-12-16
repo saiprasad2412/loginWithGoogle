@@ -2,13 +2,6 @@ import React, { useState } from "react";
 import loginPageImg from "../assets/loginpageImg.png";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log("Login clicked!", { email, password });
-  };
 
   const handleGoogleSignIn = () => {
     window.open("http://localhost:8080/auth/google/callback", "_self");
