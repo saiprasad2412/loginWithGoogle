@@ -6,29 +6,17 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String, 
-    },
+    files: [
+      {
+        fileName: { type: String, required: true },
+        filePath: { type: String, required: true },
+        fileType: { type: String, required: true },
+      },
+    ],
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', 
-      },
-    ],
-    comments: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
-        content: {
-          type: String,
-          required: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
       },
     ],
     creator: {

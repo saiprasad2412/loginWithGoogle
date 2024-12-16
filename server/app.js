@@ -7,7 +7,10 @@ import passport from "passport";
 import { Strategy as OAuth2Strategy } from "passport-google-oauth2";
 import connectDB from "./db/connection.js"; // Assuming this initializes your MongoDB connection
 import userDB from "./models/user.schema.js";
+import Post from "./models/posts.schema.js";
 import postsRoutes from "./routes/Posts.routes.js"
+import path from "path";
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -25,7 +28,11 @@ app.use(
 
 app.use(express.json());
 connectDB();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/feed",postsRoutes);
 
 // Setup session

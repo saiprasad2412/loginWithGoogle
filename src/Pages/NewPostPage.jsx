@@ -1,12 +1,16 @@
+// src/pages/NewPostPage.js
+
 import React, { useState } from "react";
-import { MdDelete, MdVolumeOff, MdVolumeUp } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import { createPost } from "../service/Post.service";
 
 const NewPostPage = () => {
   const [postContent, setPostContent] = useState("");
   const [files, setFiles] = useState([]); // Store file objects
   const [previewUrls, setPreviewUrls] = useState([]); // Preview URLs for slider
   const [currentIndex, setCurrentIndex] = useState(0); // Slider index
-  const [isMuted, setIsMuted] = useState(true); // State for mute/unmute
+  const [isLoading, setIsLoading] = useState(false); // To show loading state
+  const [error, setError] = useState(null); // To show error messages
 
   // Handle file selection and generate previews
   const handleFileChange = (e) => {
@@ -19,7 +23,7 @@ const NewPostPage = () => {
     setCurrentIndex(0); // Reset slider index to first item
   };
 
-  // Delete current image or video
+  // Delete current image
   const handleDeleteImage = () => {
     const updatedFiles = files.filter((_, index) => index !== currentIndex);
     const updatedUrls = previewUrls.filter((_, index) => index !== currentIndex);
@@ -46,23 +50,8 @@ const NewPostPage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % previewUrls.length);
   };
 
-  // Toggle Play/Pause on Video
-  const togglePlayPause = (e) => {
-    const videoElement = e.target;
-    if (videoElement.paused) {
-      videoElement.play();
-    } else {
-      videoElement.pause();
-    }
-  };
-
-  // Toggle Mute/Unmute
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-  };
-
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (files.length === 0) {
@@ -70,18 +59,23 @@ const NewPostPage = () => {
       return;
     }
 
+    setIsLoading(true); // Set loading state
+    setError(null); // Clear previous errors
+
     try {
-      const formData = new FormData();
-      formData.append("content", postContent);
+      const response = await createPost(postContent, files); // Call the service function
 
-      // Append all files
-      files.forEach((file) => formData.append("files", file));
-
-      console.log("formData", formData);
-      alert("Post ready to submit!");
+      // Handle successful post creation
+      console.log("Post created successfully:", response);
+      alert("Post created successfully!");
+      setPostContent(""); // Reset content
+      setFiles([]); // Reset files
+      setPreviewUrls([]); // Reset preview URLs
     } catch (error) {
-      console.error("Error uploading files:", error);
-      alert("Error uploading post.");
+      console.error("Error creating post:", error);
+      setError("Failed to create post. Please try again.");
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
   };
 
@@ -100,12 +94,11 @@ const NewPostPage = () => {
         {previewUrls.length > 0 && (
           <div className="relative w-full h-64 mb-4 bg-gray-100 rounded-lg overflow-hidden">
             {/* Display Image or Video */}
-            {files[currentIndex]?.type.startsWith("video/") ? (
+            {previewUrls[currentIndex].includes("video") ? (
               <video
                 src={previewUrls[currentIndex]}
-                muted={isMuted}
+                controls
                 className="w-full h-full object-cover"
-                onClick={togglePlayPause} // Play/Pause on click
               />
             ) : (
               <img
@@ -133,7 +126,7 @@ const NewPostPage = () => {
               </>
             )}
 
-            {/* Image/Video Counter */}
+            {/* Image Counter */}
             <div className="absolute top-2 right-2 bg-white text-black px-2 py-1 rounded text-sm font-semibold shadow">
               {currentIndex + 1} / {previewUrls.length}
             </div>
@@ -145,20 +138,6 @@ const NewPostPage = () => {
             >
               <MdDelete className="text-3xl text-white hover:text-gray-300" />
             </button>
-
-            {/* Mute/Unmute Button for Videos */}
-            {files[currentIndex]?.type.startsWith("video/") && (
-              <button
-                onClick={toggleMute}
-                className="absolute top-2 left-2 bg-white text-black p-2 rounded-full shadow hover:bg-gray-200"
-              >
-                {isMuted ? (
-                  <MdVolumeOff className="text-xl" />
-                ) : (
-                  <MdVolumeUp className="text-xl" />
-                )}
-              </button>
-            )}
           </div>
         )}
 
@@ -190,6 +169,11 @@ const NewPostPage = () => {
               multiple
               onChange={handleFileChange}
             />
+
+            <div className="flex items-center space-x-2 text-blue-500 font-semibold cursor-pointer">
+              <span>📷</span>
+              <span>Camera</span>
+            </div>
           </div>
         ) : (
           <div className="mb-4">
@@ -198,7 +182,7 @@ const NewPostPage = () => {
               className="flex items-center space-x-2 cursor-pointer text-blue-500 font-semibold"
             >
               <span>➕</span>
-              <span>Add more images/videos</span>
+              <span>Add more images</span>
             </label>
             <input
               type="file"
@@ -214,10 +198,13 @@ const NewPostPage = () => {
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
-          className="w-full bg-black text-white font-bold py-2 rounded-full hover:bg-gray-800 transition"
+          className={`w-full bg-black text-white font-bold py-2 rounded-full hover:bg-gray-800 transition ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+          disabled={isLoading}
         >
-          CREATE
+          {isLoading ? "Creating..." : "CREATE"}
         </button>
+
+        {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
     </div>
   );

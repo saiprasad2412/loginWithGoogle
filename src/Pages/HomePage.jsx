@@ -1,7 +1,10 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import { getAllPosts } from "../service/Post.service";
+import InfiniteScroll from "react-infinite-scroll-component";
+import moment from "moment";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 const HomePage = () => {
   const [limit] = useState(10);
@@ -9,11 +12,9 @@ const HomePage = () => {
   const [feedData, setFeedData] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [user, setUser] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // Hook for redirection
+  const navigate = useNavigate();
 
-  // Get user info
   const getUser = async () => {
     try {
       const res = await axios.get("http://localhost:8080/login/success", {
@@ -25,32 +26,39 @@ const HomePage = () => {
     }
   };
 
-  // Fetch posts data
   const getFeedDataFn = async (limit, page) => {
-    setLoading(true);
     try {
       const data = await getAllPosts(limit, page);
       if (data.length === 0) {
-        setHasMore(false);
+        setHasMore(false); // Stop further fetching
       } else {
         setFeedData((prevData) => [...prevData, ...data]);
       }
     } catch (error) {
       console.log("Error while fetching feed data:", error);
-    } finally {
-      setLoading(false);
+      setHasMore(false);
     }
   };
 
-  // Infinite scroll handler
-  const handleScroll = () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop + 1 >=
-        document.documentElement.scrollHeight &&
-      !loading &&
-      hasMore
-    ) {
-      setPage((prev) => prev + 1);
+  const fetchMoreData = () => {
+    setPage((prev) => prev + 1);
+  };
+
+  const scrollMedia = (sliderId, direction, totalFiles) => {
+    const slider = document.getElementById(sliderId);
+    if (slider) {
+      const scrollAmount = slider.clientWidth; // Full scroll width
+      const maxScroll = (totalFiles - 1) * scrollAmount; // Total scrollable width
+
+      if (direction === 1 && slider.scrollLeft >= maxScroll) {
+        // If right scroll and reached the end, go back to the first file
+        slider.scrollLeft = 0;
+      } else if (direction === -1 && slider.scrollLeft <= 0) {
+        // If left scroll and at the start, go to the last file
+        slider.scrollLeft = maxScroll;
+      } else {
+        slider.scrollLeft += direction * scrollAmount;
+      }
     }
   };
 
@@ -60,67 +68,118 @@ const HomePage = () => {
 
   useEffect(() => {
     getUser();
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row p-6 space-x-4">
-      {/* Profile Section */}
-      <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
-        <div className="flex items-center">
-          <img
-            src={user.image || "https://via.placeholder.com/80"}
-            alt="User Avatar"
-            className="rounded-full w-20 h-20 mb-4"
-          />
-          <div className="flex flex-col-reverse ml-4">
-            <h2 className="text-2xl font-bold">{user.displayName || "User"}</h2>
-            <p className="text-sm text-gray-500">Welcome Back</p>
+    <div className="p-6 space-y-4 bg-gray-100 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center bg-white p-4 rounded-lg shadow-md">
+        <img
+          src={user?.image || "https://via.placeholder.com/80"}
+          alt="User Avatar"
+          className="rounded-full w-16 h-16 object-cover"
+        />
+        <div className="ml-4">
+          <p className="text-gray-500">Welcome Back,</p>
+          <h2 className="text-2xl font-bold">{user?.displayName || "User"}</h2>
+        </div>
+      </div>
+
+      {/* Feeds */}
+      <h2 className="text-2xl font-bold text-gray-700">Feeds</h2>
+      <InfiniteScroll
+        dataLength={feedData.length}
+        next={fetchMoreData}
+        hasMore={hasMore}
+        loader={
+          <div className="text-center text-gray-500 animate-pulse">
+            Loading...
           </div>
-        </div>
-      </div>
-
-      {/* Feed Section */}
-      <div className="w-full lg:w-3/4">
-        <h2 className="text-xl font-bold mb-4">Feeds</h2>
-
-        {/* Feed Data */}
-        <div className="space-y-4">
-          {feedData.length > 0 ? (
-            feedData.map((post) => (
-              <div
-                key={post.id}
-                className="border p-4 rounded-lg shadow-md bg-white"
-              >
-                <div className="flex items-center mb-2">
-                  <h3 className="font-bold text-lg">{post.name}</h3>
-                  <span className="text-gray-500 text-sm ml-2">
-                    {post.time || "Just now"}
-                  </span>
-                </div>
-                <p className="text-gray-700">{post.content}</p>
-                <div className="mt-2 text-gray-500 text-sm">
-                  ❤️ {post.likes} Likes
-                </div>
+        }
+        endMessage={
+          <p className="text-center text-gray-500">
+            Yay! You have seen all posts 🎉
+          </p>
+        }
+      >
+        <div className="space-y-6 max-w-2xl mx-auto">
+          {feedData.map((post) => (
+            <div
+              key={post._id}
+              className="rounded-lg shadow-lg p-4 bg-white relative hover:shadow-xl transition"
+            >
+              {/* User and Time */}
+              <div className="flex flex-col items-start mb-4">
+                <p className="font-bold">{post.creator?.displayName || "Anonymous"}</p>
+                <p className="text-sm text-gray-400">
+                  {moment(post.createdAt).fromNow()}
+                </p>
               </div>
-            ))
-          ) : (
-            !loading && <p className="text-center text-gray-500">No posts to show</p>
-          )}
+
+              {/* Post Content */}
+              <p className="text-gray-800 mb-4">{post.content}</p>
+
+              {/* File Slider */}
+              {post.files?.length > 0 && (
+                <div className="relative w-full h-[500px] overflow-hidden">
+                  <div
+                    id={`slider-${post._id}`}
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{
+                      scrollSnapType: "x mandatory",
+                      overflowX: "hidden",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {post.files.map((file, index) =>
+                      file.fileType.includes("image") ? (
+                        <img
+                          key={index}
+                          src={`http://localhost:8080/${file.filePath}`}
+                          alt={file.fileName}
+                          className="inline-block w-full h-full object-cover rounded-lg"
+                          style={{ scrollSnapAlign: "center" }}
+                        />
+                      ) : file.fileType.includes("video") ? (
+                        <video
+                          key={index}
+                          src={`http://localhost:8080/${file.filePath}`}
+                          controls
+                          className="inline-block w-full h-full object-cover rounded-lg"
+                          style={{ scrollSnapAlign: "center" }}
+                        />
+                      ) : null
+                    )}
+                  </div>
+
+                  {/* Scroll Buttons */}
+                  <button
+                    onClick={() =>
+                      scrollMedia(`slider-${post._id}`, -1, post.files.length)
+                    }
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
+                  >
+                    <MdChevronLeft size={32} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      scrollMedia(`slider-${post._id}`, 1, post.files.length)
+                    }
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
+                  >
+                    <MdChevronRight size={32} />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
+      </InfiniteScroll>
 
-        {/* Loading Indicator */}
-        {loading && (
-          <div className="text-center text-gray-500 mt-4">Loading...</div>
-        )}
-      </div>
-
-      {/* Add New Post Button */}
+      {/* Add Post Button */}
       <button
         onClick={() => navigate("/new-post")}
-        className="fixed bottom-8 right-8 bg-black text-white text-2xl font-bold rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-gray-800 transition"
-        aria-label="Add New Post"
+        className="fixed bottom-6 right-6 w-16 h-16 bg-black text-white text-3xl font-bold rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition"
       >
         +
       </button>
