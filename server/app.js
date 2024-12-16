@@ -4,13 +4,13 @@ import mongoose from "mongoose";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
-import { Strategy as OAuth2Strategy } from "passport-google-oauth2";
 import connectDB from "./db/connection.js"; // Assuming this initializes your MongoDB connection
-import userDB from "./models/user.schema.js";
-import Post from "./models/posts.schema.js";
-import postsRoutes from "./routes/Posts.routes.js"
+import postsRoutes from "./routes/Posts.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
+
+import configureGoogleAuth from "./utils/configureGoogleAuth.js";
 
 dotenv.config();
 
@@ -28,12 +28,14 @@ app.use(
 
 app.use(express.json());
 connectDB();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use("/feed",postsRoutes);
+app.use("/feed", postsRoutes);
+app.use("/auth", authRoutes);  
 
 // Setup session
 app.use(
@@ -48,89 +50,12 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Configure Google authentication
 const clientId = process.env.CLIENTID;
 const clientSecret = process.env.CLIENTSECRET;
+configureGoogleAuth(clientId, clientSecret);
 
-// Configure Passport with Google OAuth2 strategy
-passport.use(
-  new OAuth2Strategy(
-    {
-      clientID: clientId,
-      clientSecret: clientSecret,
-      callbackURL: "/auth/google/callback",
-      scope: ["email", "profile"],
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      console.log("Profile:", profile);
-
-      try {
-        const existingUser = await userDB.findOne({ googleId: profile.id });
-        if (existingUser) {
-          return done(null, existingUser);
-        }
-        const user = new userDB({
-          googleId: profile.id,
-          displayName: profile.displayName,
-          email: profile.emails[0].value,
-          image: profile.photos[0].value,
-        });
-        await user.save();
-        return done(null, user);
-      } catch (error) {
-        return done(error, null);
-      }
-    }
-  )
-);
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await userDB.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
-
-// Routes
-app.get("/auth/google", passport.authenticate("google", { scope: ["email", "profile"] }));
-
-app.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    successRedirect: "http://localhost:5173/dashboard",
-    failureRedirect: "http://localhost:5173/login",
-  })
-);
-
-
-app.get("/login/success", (req, res) => {
-  if (req.user) {
-    res.status(200).json({
-      success: true,
-      message: "User logged in successfully",
-      user: req.user,
-    });
-  } else {
-    res.status(401).json({
-      success: false,
-      message: "User not logged in",
-    });
-  }
-});
-
-app.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("http://localhost:5173/");
-  });
-});
+// Use the authentication routes
 
 // Start server
 app.listen(PORT, () => {
