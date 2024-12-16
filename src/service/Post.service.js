@@ -15,9 +15,10 @@ export const getAllPosts = async (limit, page) => {
 };
 
 // Create a new post
-export const createPost = async (content, files) => {
+export const createPost = async (content, files, id) => {
   const formData = new FormData();
   formData.append("content", content);
+  formData.append("id", id);
 
   // Append all files to FormData
   files.forEach((file) => formData.append("files", file));

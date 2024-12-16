@@ -1,6 +1,6 @@
 // src/pages/NewPostPage.js
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
 import { createPost } from "../service/Post.service";
 
@@ -11,6 +11,7 @@ const NewPostPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0); // Slider index
   const [isLoading, setIsLoading] = useState(false); // To show loading state
   const [error, setError] = useState(null); // To show error messages
+  const [userId, setUserId] = useState(null);
 
   // Handle file selection and generate previews
   const handleFileChange = (e) => {
@@ -22,7 +23,6 @@ const NewPostPage = () => {
     setPreviewUrls([...previewUrls, ...newFileUrls]);
     setCurrentIndex(0); // Reset slider index to first item
   };
-
   // Delete current image
   const handleDeleteImage = () => {
     const updatedFiles = files.filter((_, index) => index !== currentIndex);
@@ -63,7 +63,7 @@ const NewPostPage = () => {
     setError(null); // Clear previous errors
 
     try {
-      const response = await createPost(postContent, files); // Call the service function
+      const response = await createPost(postContent, files ,userId); // Call the service function
 
       // Handle successful post creation
       console.log("Post created successfully:", response);
@@ -78,6 +78,15 @@ const NewPostPage = () => {
       setIsLoading(false); // Reset loading state
     }
   };
+  useEffect(()=>{
+    const user=localStorage.getItem("user");
+    if(user){
+      const userData=JSON.parse(user)
+      setUserId(userData._id);
+      console.log('user==>',userData._id);
+      
+    }
+  },[]);
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-gray-50">

@@ -19,10 +19,11 @@ const HomePage = () => {
 
   const getUser = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/login/success", {
+      const res = await axios.get("http://localhost:8080/auth/login/success", {
         withCredentials: true,
       });
       setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
     } catch (error) {
       console.log("Error while getting user info", error);
     }
@@ -93,6 +94,7 @@ const HomePage = () => {
           alt="User Avatar"
           className="rounded-full w-16 h-16 object-cover"
         />
+        {console.log('user', user)}
         <div className="ml-4">
           <p className="text-gray-500">Welcome Back,</p>
           <h2 className="text-2xl font-bold">{user?.displayName || "User"}</h2>

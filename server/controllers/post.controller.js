@@ -58,8 +58,8 @@ export const getPosts = async (req, res) => {
 // =======================
 export const createPost = async (req, res) => {
   try {
-    const { content } = req.body;
-    const creator = req?.user?.id ||"675eb61c80df728d1363d90f"; // User ID from middleware
+    const { content,id } = req.body;
+    const creator = id; // User ID from middleware
 
 
     // Prepare file details for uploaded files
