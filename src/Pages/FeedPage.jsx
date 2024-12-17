@@ -47,7 +47,10 @@ const FeedPage = () => {
         scrollableTarget="scrollableDiv"
       >
         {feedData.map((post, index) => (
-          <FeedCard key={index} post={post} />
+          
+
+            <FeedCard key={index} post={post} />
+          
         ))}
       </InfiniteScroll>
     </div>

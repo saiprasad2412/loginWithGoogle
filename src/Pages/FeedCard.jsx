@@ -1,13 +1,25 @@
-import React from 'react'
+import React, { useRef } from "react";
 import moment from "moment";
+import { MdChevronLeft, MdChevronRight, MdFavorite, MdFavoriteBorder, MdShare } from "react-icons/md";
 
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
-import { MdFavorite, MdFavoriteBorder, MdShare } from "react-icons/md"; // Import Material Design icons
-const FeedCard = ({post, likedPosts = []}) => {
+const FeedCard = ({ post, likedPosts = [], handleLike, handleShare }) => {
+    const sliderRef = useRef(null);
+
+    // Scroll function
+    const scrollMedia = (direction) => {
+        if (sliderRef.current) {
+            const width = sliderRef.current.offsetWidth;
+            sliderRef.current.scrollBy({
+                left: direction === "left" ? -width : width,
+                behavior: "smooth",
+            });
+        }
+    };
+
     return (
         <div
             key={post._id}
-            className="rounded-lg shadow-lg p-4 bg-white relative hover:shadow-xl transition"
+            className="rounded-lg shadow-lg p-4 bg-white relative hover:shadow-xl transition m-4 md:w-1/2 m-auto mb-4"
         >
             {/* User and Time */}
             <div className="flex items-center mb-4">
@@ -25,15 +37,14 @@ const FeedCard = ({post, likedPosts = []}) => {
             {/* Post Content */}
             <p className="text-gray-800 mb-4">{post.content}</p>
 
-            {/* File Slider */}
+            {/* File Slider with Snap Scroll */}
             {post.files?.length > 0 && (
-                <div className="relative w-full h-[500px] overflow-hidden">
+                <div className="relative w-full h-[500px] overflow-x-hidden mb-4">
                     <div
-                        id={`slider-${post._id}`}
-                        className="flex transition-transform duration-300 ease-in-out"
+                        ref={sliderRef}
+                        className="flex transition-transform duration-300 ease-in-out overflow-x-auto scrollbar-none"
                         style={{
                             scrollSnapType: "x mandatory",
-                            overflowX: "hidden",
                             whiteSpace: "nowrap",
                         }}
                     >
@@ -43,7 +54,7 @@ const FeedCard = ({post, likedPosts = []}) => {
                                     key={index}
                                     src={`http://localhost:8080/${file.filePath}`}
                                     alt={file.fileName}
-                                    className="inline-block w-full h-full object-cover rounded-lg"
+                                    className="w-full h-[500px] object-contain rounded-lg flex-shrink-0"
                                     style={{ scrollSnapAlign: "center" }}
                                 />
                             ) : file.fileType.includes("video") ? (
@@ -51,7 +62,7 @@ const FeedCard = ({post, likedPosts = []}) => {
                                     key={index}
                                     src={`http://localhost:8080/${file.filePath}`}
                                     controls
-                                    className="inline-block w-full h-full object-cover rounded-lg"
+                                    className="w-full h-[500px] object-contain rounded-lg flex-shrink-0"
                                     style={{ scrollSnapAlign: "center" }}
                                 />
                             ) : null
@@ -59,51 +70,51 @@ const FeedCard = ({post, likedPosts = []}) => {
                     </div>
 
                     {/* Scroll Buttons */}
-                    <button
-                        onClick={() =>
-                            scrollMedia(`slider-${post._id}`, -1, post.files.length)
-                        }
-                        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
-                    >
-                        <MdChevronLeft size={32} />
-                    </button>
-                    <button
-                        onClick={() =>
-                            scrollMedia(`slider-${post._id}`, 1, post.files.length)
-                        }
-                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
-                    >
-                        <MdChevronRight size={32} />
-                    </button>
-
-                    {/* Like and Share Buttons */}
-                    <div className="absolute bottom-4 left-4 flex items-center space-x-4">
-                        <button
-                            onClick={() => handleLike(post._id)}
-                            className="text-red-500 p-2 rounded-full hover:bg-gray-200 transition-all"
-                        >
-                            {likedPosts[post._id] ? (
-                                <MdFavorite size={24} />
-                            ) : (
-                                <MdFavoriteBorder size={24} />
-                            )}
-                        </button>
-                        <p className="text-gray-500">{post.likes.length}</p>
-                    </div>
-
-                    <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-                        <button
-                            onClick={() => handleShare(post._id)}
-                            className="text-blue-500 p-2 rounded-full hover:bg-gray-200 transition-all flex items-center space-x-2"
-                        >
-                            <MdShare size={24} />
-                            <span className="text-sm">Share</span>
-                        </button>
-                    </div>
+                    {post.files.length > 1 && (
+                        <>
+                            <button
+                                onClick={() => scrollMedia("left")}
+                                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full z-10 hover:bg-gray-700"
+                            >
+                                <MdChevronLeft size={32} />
+                            </button>
+                            <button
+                                onClick={() => scrollMedia("right")}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full z-10 hover:bg-gray-700"
+                            >
+                                <MdChevronRight size={32} />
+                            </button>
+                        </>
+                    )}
                 </div>
             )}
-        </div>
-    )
-}
 
-export default FeedCard
+            {/* Like and Share Buttons */}
+            <div className="flex items-center justify-between mt-4 px-4">
+                <div className="flex items-center space-x-4">
+                    <button
+                        onClick={() => handleLike(post._id)}
+                        className="text-red-500 p-2 rounded-full hover:bg-gray-200 transition-all"
+                    >
+                        {likedPosts[post._id] ? (
+                            <MdFavorite size={24} />
+                        ) : (
+                            <MdFavoriteBorder size={24} />
+                        )}
+                    </button>
+                    <p className="text-gray-500">{post.likes.length}</p>
+                </div>
+
+                <button
+                    onClick={() => handleShare(post._id)}
+                    className="text-blue-500 p-2 rounded-full hover:bg-gray-200 transition-all flex items-center space-x-2"
+                >
+                    <MdShare size={24} />
+                    <span className="text-sm">Share</span>
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default FeedCard;
