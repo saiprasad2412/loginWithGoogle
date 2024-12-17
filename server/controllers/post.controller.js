@@ -18,9 +18,10 @@ export const upload = multer({ storage });
 // Controller: Fetch All Posts with Pagination
 // =======================
 export const getPosts = async (req, res) => {
+  console.log({query: req.query})
   try {
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 5; // Default limit to 5 posts per page
+    const page = parseInt(req.query._page) || 1; // Default to page 1
+    const limit = parseInt(req.query._limit) || 2; // Default limit to 5 posts per page
 
     const skip = (page - 1) * limit;
 

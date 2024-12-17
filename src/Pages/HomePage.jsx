@@ -6,6 +6,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import moment from "moment";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { MdFavorite, MdFavoriteBorder, MdShare } from "react-icons/md"; // Import Material Design icons
+import FeedPage from "./FeedPage";
 
 const HomePage = () => {
   const [limit] = useState(10);
@@ -28,59 +29,6 @@ const HomePage = () => {
       console.log("Error while getting user info", error);
     }
   };
-
-  const getFeedDataFn = async (limit, page) => {
-    try {
-      const data = await getAllPosts(limit, page);
-      if (data.length === 0) {
-        setHasMore(false); // Stop further fetching
-      } else {
-        setFeedData((prevData) => [...prevData, ...data]);
-      }
-    } catch (error) {
-      console.log("Error while fetching feed data:", error);
-      setHasMore(false);
-    }
-  };
-
-  const fetchMoreData = () => {
-    setPage((prev) => prev + 1);
-  };
-
-  const scrollMedia = (sliderId, direction, totalFiles) => {
-    const slider = document.getElementById(sliderId);
-    if (slider) {
-      const scrollAmount = slider.clientWidth; // Full scroll width
-      const maxScroll = (totalFiles - 1) * scrollAmount; // Total scrollable width
-
-      if (direction === 1 && slider.scrollLeft >= maxScroll) {
-        // If right scroll and reached the end, go back to the first file
-        slider.scrollLeft = 0;
-      } else if (direction === -1 && slider.scrollLeft <= 0) {
-        // If left scroll and at the start, go to the last file
-        slider.scrollLeft = maxScroll;
-      } else {
-        slider.scrollLeft += direction * scrollAmount;
-      }
-    }
-  };
-
-  const handleLike = (postId) => {
-    setLikedPosts((prev) => ({
-      ...prev,
-      [postId]: !prev[postId], // Toggle like state
-    }));
-  };
-
-  const handleShare = (postId) => {
-    // Implement sharing functionality, for now just log the postId
-    console.log("Shared post:", postId);
-  };
-
-  useEffect(() => {
-    getFeedDataFn(limit, page);
-  }, [page]);
-
   useEffect(() => {
     getUser();
   }, []);
@@ -103,124 +51,7 @@ const HomePage = () => {
 
       {/* Feeds */}
       <h2 className="text-2xl font-bold text-gray-700">Feeds</h2>
-      <InfiniteScroll
-        dataLength={feedData.length}
-        next={fetchMoreData}
-        hasMore={hasMore}
-        loader={
-          <div className="text-center text-gray-500 animate-pulse">
-            Loading...
-          </div>
-        }
-        endMessage={
-          <p className="text-center text-gray-500">
-            Yay! You have seen all posts 🎉
-          </p>
-        }
-      >
-        <div className="space-y-6 max-w-2xl mx-auto">
-          {feedData.map((post) => (
-            <div
-              key={post._id}
-              className="rounded-lg shadow-lg p-4 bg-white relative hover:shadow-xl transition"
-            >
-              {/* User and Time */}
-              <div className="flex items-center mb-4">
-                <img
-                  src={post.creator?.image || "https://via.placeholder.com/40"}
-                  alt={post.creator?.displayName || "Anonymous"}
-                  className="rounded-full w-10 h-10 object-cover"
-                />
-                <div className="ml-4">
-                  <p className="font-bold">{post.creator?.displayName || "Anonymous"}</p>
-                  <p className="text-sm text-gray-400">{moment(post.createdAt).fromNow()}</p>
-                </div>
-              </div>
-
-              {/* Post Content */}
-              <p className="text-gray-800 mb-4">{post.content}</p>
-
-              {/* File Slider */}
-              {post.files?.length > 0 && (
-                <div className="relative w-full h-[500px] overflow-hidden">
-                  <div
-                    id={`slider-${post._id}`}
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{
-                      scrollSnapType: "x mandatory",
-                      overflowX: "hidden",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {post.files.map((file, index) =>
-                      file.fileType.includes("image") ? (
-                        <img
-                          key={index}
-                          src={`http://localhost:8080/${file.filePath}`}
-                          alt={file.fileName}
-                          className="inline-block w-full h-full object-cover rounded-lg"
-                          style={{ scrollSnapAlign: "center" }}
-                        />
-                      ) : file.fileType.includes("video") ? (
-                        <video
-                          key={index}
-                          src={`http://localhost:8080/${file.filePath}`}
-                          controls
-                          className="inline-block w-full h-full object-cover rounded-lg"
-                          style={{ scrollSnapAlign: "center" }}
-                        />
-                      ) : null
-                    )}
-                  </div>
-
-                  {/* Scroll Buttons */}
-                  <button
-                    onClick={() =>
-                      scrollMedia(`slider-${post._id}`, -1, post.files.length)
-                    }
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
-                  >
-                    <MdChevronLeft size={32} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      scrollMedia(`slider-${post._id}`, 1, post.files.length)
-                    }
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2 rounded-full"
-                  >
-                    <MdChevronRight size={32} />
-                  </button>
-
-                  {/* Like and Share Buttons */}
-                  <div className="absolute bottom-4 left-4 flex items-center space-x-4">
-                    <button
-                      onClick={() => handleLike(post._id)}
-                      className="text-red-500 p-2 rounded-full hover:bg-gray-200 transition-all"
-                    >
-                      {likedPosts[post._id] ? (
-                        <MdFavorite size={24} />
-                      ) : (
-                        <MdFavoriteBorder size={24} />
-                      )}
-                    </button>
-                    <p className="text-gray-500">{post.likes.length}</p>
-                  </div>
-
-                  <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-                    <button
-                      onClick={() => handleShare(post._id)}
-                      className="text-blue-500 p-2 rounded-full hover:bg-gray-200 transition-all flex items-center space-x-2"
-                    >
-                      <MdShare size={24} />
-                      <span className="text-sm">Share</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </InfiniteScroll>
+      <FeedPage/>
 
       {/* Add Post Button */}
       <button

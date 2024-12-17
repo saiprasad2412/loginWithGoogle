@@ -7,7 +7,7 @@ export const getAllPosts = async (limit, page) => {
       `http://localhost:8080/feed/posts?_limit=${limit}&_page=${page}`
     );
     console.log("Posts fetched successfully:", res.data);
-    return res?.data?.posts; // Return posts data
+    return res?.data; // Return posts data
   } catch (error) {
     console.error("Error while fetching posts:", error);
     return { error: error.message }; // Return error message for better error handling
