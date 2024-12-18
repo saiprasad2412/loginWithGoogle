@@ -7,6 +7,8 @@ const FeedPage = () => {
   const [feedData, setFeedData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [loggedInUserId,setLoggedInUserId]=useState(null);
+  const [onupdateFlag,setOnupdateFlag]=useState(false);
 
 
   const getFeedDataFn = async (limit, page) => {
@@ -15,6 +17,9 @@ const FeedPage = () => {
       console.log({ data })
       setTotalCount(data.totalPosts);
       setFeedData((prevData) => [...prevData, ...data.posts]);
+
+      const res=JSON.parse(localStorage.getItem('user'));
+    setLoggedInUserId(res._id);
     } catch (error) {
       console.log("Error while fetching feed data:", error);
       setHasMore(false);
@@ -49,9 +54,11 @@ const FeedPage = () => {
   
 
   useEffect(() => {
-    getFeedDataFn(20,page)
-    
+    getFeedDataFn(20,page);
   }, [])
+  useEffect(() => {
+    getFeedDataFn(20,page);
+  }, [onupdateFlag])
 
   return (
     <div
@@ -78,7 +85,7 @@ const FeedPage = () => {
         {feedData.map((post, index) => (
           
 
-            <FeedCard key={index} post={post} handleLike={handleLike} />
+            <FeedCard key={index} post={post} handleLike={handleLike} loggedInUserId={loggedInUserId} getFeedDataFn={getFeedDataFn} onupdateFlag={onupdateFlag} setOnupdateFlag={setOnupdateFlag}/>
           
         ))}
       </InfiniteScroll>
