@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { FiEdit2, FiArrowLeft } from "react-icons/fi"; // Import FiArrowLeft for back button
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import "react-toastify/dist/ReactToastify.css"; 
 import { getProfilePageDataFn, updateProfileDataFn } from "../service/user.service";
 
 const EditProfile = () => {
   let { id } = useParams();
   id = id.slice(1);
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
@@ -20,7 +20,7 @@ const EditProfile = () => {
       setProfileImage(data?.image || null);
       setCoverImage(data?.coverImage || null);
       setBio(data?.bio || "");
-      setName(data?.displayName || "");
+      setDisplayName(data?.displayName || "");
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -39,7 +39,7 @@ const EditProfile = () => {
 
   const handleSave = async () => {
     const updatedData = {
-      name,
+      displayName,
       bio,
       profileImage,
       coverImage,
@@ -142,14 +142,14 @@ const EditProfile = () => {
 
         {/* Name Field */}
         <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
             Name
           </label>
           <input
-            id="name"
+            id="displayName"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>

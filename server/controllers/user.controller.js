@@ -16,14 +16,14 @@ const getUserInfo = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  const { name, bio, profileImage, coverImage } = req.body;
+  const { displayName, bio, profileImage, coverImage } = req.body;
 
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // Update fields
-    user.name = name || user.name;
+    user.displayName = displayName || user.displayName;
     user.bio = bio || user.bio;
     user.image = profileImage || user.image;
     user.coverImage = coverImage || user.coverImage;
