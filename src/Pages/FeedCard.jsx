@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import moment from "moment";
 import { MdChevronLeft, MdChevronRight, MdFavorite, MdFavoriteBorder, MdShare } from "react-icons/md";
 
 const FeedCard = ({ post, likedPosts = [], handleLike, handleShare }) => {
   const sliderRef = useRef(null);
+
 
   // Scroll function
   const scrollMedia = (direction) => {
@@ -102,7 +103,7 @@ const FeedCard = ({ post, likedPosts = [], handleLike, handleShare }) => {
               <MdFavoriteBorder size={24} />
             )}
           </button>
-          <p className="text-gray-500">{post.likes.length}</p>
+          <p className="text-gray-500">{post?.likes?.length }</p>
         </div>
 
         <button

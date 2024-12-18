@@ -50,3 +50,10 @@ export const getPostofCreator= async(id)=>{
     
   }
 }
+
+export const handleLikeFn= async(postId, userId)=>{
+  console.log('userid',userId);
+  
+  const res=await axios.put(`http://localhost:8080/feed/posts/:${postId}/like`,{userId});
+  return res;
+}

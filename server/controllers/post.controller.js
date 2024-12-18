@@ -113,3 +113,48 @@ export const getPostOfCreator = async (req, res) => {
   }
 };
 
+
+// Controller to like/unlike a post
+export const likePost = async (req, res) => {
+  console.log('req',req.params.postId, typeof(req.params.postId));
+  
+  const { userId } = req.body;
+  let postId=req.params.postId;
+  postId=postId.slice(1);
+  console.log('postid',postId);
+  
+
+  try {
+    // Find the post by ID
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+
+    // Check if user has already liked the post
+    const likedIndex = post.likes.indexOf(req.body.userId);
+
+    if (likedIndex === -1) {
+      // User hasn't liked the post, so add their ID
+      post.likes.push(req.body.userId);
+      await post.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "Post liked", likes: post.likes });
+    } else {
+      // User already liked the post, so remove their ID
+      post.likes.splice(likedIndex, 1);
+      await post.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "Post unliked", likes: post.likes });
+    }
+  } catch (error) {
+    console.error("Error in liking post:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: error.message });
+  }
+};
+
+

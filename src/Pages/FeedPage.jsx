@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { getAllPosts } from '../service/Post.service';
+import { getAllPosts, handleLikeFn } from '../service/Post.service';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import FeedCard from './FeedCard';
 
@@ -7,6 +7,7 @@ const FeedPage = () => {
   const [feedData, setFeedData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
 
   const getFeedDataFn = async (limit, page) => {
     try {
@@ -19,9 +20,37 @@ const FeedPage = () => {
       setHasMore(false);
     }
   };
+  const handleLike = async (postId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user?._id;
+  
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+  
+      // Await the response from the like API
+      const response = await handleLikeFn(postId, userId);
+      console.log("Like response:", response);
+  
+      // Update the feedData state to reflect the new likes count
+      setFeedData((prevData) =>
+        prevData.map((post) =>
+          post._id === postId
+            ? { ...post, likes: response.likes } // Update likes array
+            : post
+        )
+      );
+    } catch (error) {
+      console.error("Error while liking the post:", error);
+    }
+  };
+  
 
   useEffect(() => {
     getFeedDataFn(20,page)
+    
   }, [])
 
   return (
@@ -49,7 +78,7 @@ const FeedPage = () => {
         {feedData.map((post, index) => (
           
 
-            <FeedCard key={index} post={post} />
+            <FeedCard key={index} post={post} handleLike={handleLike} />
           
         ))}
       </InfiniteScroll>

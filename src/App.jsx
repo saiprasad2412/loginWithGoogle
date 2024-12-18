@@ -5,6 +5,7 @@ import HomePage from './Pages/HomePage';
 import NewPostPage from './Pages/NewPostPage';
 import ProfilePage from './Pages/ProfilePage';
 import EditProfile from './Pages/EditProfile';
+import { ToastContainer } from 'react-toastify';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -15,6 +16,7 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   return (
     <>
+    <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -23,9 +25,9 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
               <HomePage />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
