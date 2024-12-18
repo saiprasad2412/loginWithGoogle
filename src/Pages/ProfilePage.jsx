@@ -1,21 +1,24 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MdFavorite, MdAdd } from "react-icons/md";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { getProfilePageDataFn } from "../service/user.service";
 import { getPostofCreator } from "../service/Post.service";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   let { id } = useParams();
   id = id.slice(1);
   const [userData, setUserData] = useState(null);
   const [postData, setPostData] = useState([]);
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [logedInUser, setLogedInUser] = useState([]);
 
   const fetchUserData = async () => {
     try {
       const data = await getProfilePageDataFn(id);
+      console.log('user', data);
       setUserData(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -38,6 +41,9 @@ const ProfilePage = () => {
   useEffect(() => {
     fetchUserData();
     fetchPostData();
+
+    const data = localStorage.getItem('user');
+    setLogedInUser(JSON.parse(data));
   }, [id]);
 
   if (loadingUser) {
@@ -105,10 +111,20 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-10">
+        <button
+          onClick={() => navigate('/dashboard')} // Go back to the previous page
+          className="bg-gray-200 text-gray-700 p-2 rounded-full shadow hover:bg-gray-300"
+        >
+          <IoChevronBack size={24} />
+        </button>
+      </div>
+
       {/* Top Section */}
       <div className="relative h-60">
         <img
-          src={userData.image || "https://via.placeholder.com/600x200"}
+          src={userData.coverImage || "https://via.placeholder.com/600x200"}
           alt="Cover"
           className="w-full h-full object-cover"
         />
@@ -127,7 +143,12 @@ const ProfilePage = () => {
         <p className="text-gray-600 mt-2 px-4">
           {userData.bio || "This user has no bio yet."}
         </p>
-        <button className="mt-4 px-6 py-2 border border-gray-400 rounded-full hover:bg-gray-200">
+        
+        <button
+          className="mt-4 px-6 py-2 border border-gray-400 rounded-full hover:bg-gray-200"
+          disabled={!logedInUser._id == userData._id}
+          onClick={() => { navigate(`/edit-profile/:${id}`); }}
+        >
           Edit Profile
         </button>
       </div>

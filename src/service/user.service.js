@@ -17,4 +17,9 @@ const getProfilePageDataFn=async(id)=>{
     }
 
 }
-export {getProfilePageDataFn};
+
+const updateProfileDataFn= async(payload , id)=>{
+    const data = await axios.put(`http://localhost:8080/users/myprofile/${id}`,payload);
+    return data;
+}
+export {getProfilePageDataFn, updateProfileDataFn};

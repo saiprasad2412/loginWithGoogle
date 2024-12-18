@@ -4,6 +4,7 @@ import LoginPage from './Pages/LoginPage';
 import HomePage from './Pages/HomePage';
 import NewPostPage from './Pages/NewPostPage';
 import ProfilePage from './Pages/ProfilePage';
+import EditProfile from './Pages/EditProfile';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -40,6 +41,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-profile/:id"
+          element={
+            <ProtectedRoute>
+              <EditProfile />
             </ProtectedRoute>
           }
         />

@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    coverImage:{
+      type:String,
+    },
+    bio:{
+      type:String
+    },
     posts: [
       {
         type: mongoose.Schema.Types.ObjectId,
