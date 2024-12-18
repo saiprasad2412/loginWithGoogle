@@ -7,6 +7,7 @@ import passport from "passport";
 import connectDB from "./db/connection.js"; // Assuming this initializes your MongoDB connection
 import postsRoutes from "./routes/Posts.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js"
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -57,6 +58,7 @@ configureGoogleAuth(clientId, clientSecret);
 // Use the authentication routes
 app.use("/feed", postsRoutes);
 app.use("/auth", authRoutes);  
+app.use('/users', userRouter)
 
 // Start server
 app.listen(PORT, () => {

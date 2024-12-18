@@ -1,21 +1,10 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllPosts } from "../service/Post.service";
-import InfiniteScroll from "react-infinite-scroll-component";
-import moment from "moment";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
-import { MdFavorite, MdFavoriteBorder, MdShare } from "react-icons/md"; // Import Material Design icons
 import FeedPage from "./FeedPage";
 
 const HomePage = () => {
-  const [limit] = useState(10);
-  const [page, setPage] = useState(1);
-  const [feedData, setFeedData] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
   const [user, setUser] = useState("");
-  const [likedPosts, setLikedPosts] = useState({}); // Track liked posts
-
   const navigate = useNavigate();
 
   const getUser = async () => {
@@ -36,7 +25,9 @@ const HomePage = () => {
   return (
     <div className="p-6 space-y-4 bg-gray-100 min-h-screen">
       {/* Header */}
-      <div className="flex items-center bg-white p-4 rounded-lg shadow-md">
+      <div className="flex items-center bg-white p-4 rounded-lg shadow-md" onClick={()=>{
+        navigate(`/profile/:${user._id}`)
+      }}>
         <img
           src={user?.image || "https://via.placeholder.com/80"}
           alt="User Avatar"

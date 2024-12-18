@@ -40,3 +40,13 @@ export const createPost = async (content, files, id) => {
     throw error; // Re-throw the error for proper error handling in the component
   }
 };
+
+export const getPostofCreator= async(id)=>{
+  try {
+    const res= await axios.get(`http://localhost:8080/feed/myposts/${id}`);
+    return res.data;
+    
+  } catch (error) {
+    
+  }
+}

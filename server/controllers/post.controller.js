@@ -95,3 +95,21 @@ export const createPost = async (req, res) => {
     });
   }
 };
+
+export const getPostOfCreator = async (req, res) => {
+  try {
+      // Fetch posts where 'creator' matches req.params.id
+      const posts = await Post.find({ creator: req.params.id });
+
+      if (!posts || posts.length === 0) {
+          return res.status(404).json({ message: "No posts found for this creator" });
+      }
+
+      // Send the posts back to the client
+      return res.status(200).json(posts);
+  } catch (error) {
+      console.error("Error while getting posts of creator:", error.message);
+      return res.status(500).json({ message: "Error while getting posts of creator" });
+  }
+};
+
