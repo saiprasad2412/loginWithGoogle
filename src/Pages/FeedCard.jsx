@@ -8,7 +8,7 @@ import {
   MdFavoriteBorder,
   MdShare,
 } from "react-icons/md";
-import ShareModal from "../components/shareModal" // Import ShareModal
+import ShareModal from "../components/shareModal" 
 
 Modal.setAppElement("#root");
 
@@ -19,13 +19,10 @@ const FeedCard = ({ post, loggedInUserId, handleLike ,onupdateFlag,setOnupdateFl
   const userId=JSON.parse(localStorage.getItem('user'))._id;
 
   const postUrl = `http://localhost:3000/posts/${post._id}`;
-console.log('post data in card',post);
 
 useEffect(()=>{
-  // post.likes[userId]
   setIsLiked(post?.likes?.includes(userId))
 },[])
-  // Media slider scroll function
   const scrollMedia = (direction) => {
     if (sliderRef.current) {
       const width = sliderRef.current.offsetWidth;
@@ -42,7 +39,6 @@ useEffect(()=>{
         key={post._id}
         className="rounded-lg shadow-lg p-4 bg-white relative hover:shadow-xl transition m-4 flex-1"
       >
-        {/* User and Time */}
         <div className="flex items-center mb-4">
           <img
             src={post.creator?.image || "https://via.placeholder.com/40"}
@@ -57,7 +53,6 @@ useEffect(()=>{
           </div>
         </div>
 
-        {/* Post Content */}
         <p className="text-gray-800 mb-4">{post.content}</p>
 
         {/* File Slider */}
@@ -108,10 +103,7 @@ useEffect(()=>{
             )}
           </div>
         )}
-
-        {/* Like and Share Buttons */}
         <div className="flex items-center justify-between mt-4 px-4">
-          {/* Like Button */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => {
@@ -130,8 +122,6 @@ useEffect(()=>{
             </button>
             <p className="text-gray-500">{post?.likes?.length}</p>
           </div>
-
-          {/* Share Button */}
           <button
             onClick={() => setModalOpen(true)}
             className="text-blue-500 p-2 rounded-full hover:bg-gray-200 transition-all flex items-center space-x-2"
@@ -141,12 +131,10 @@ useEffect(()=>{
           </button>
         </div>
       </div>
-
-      {/* Share Modal */}
       <ShareModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-        shareUrl={postUrl} // Passing the correct URL to the ShareModal
+        shareUrl={postUrl} 
       />
     </>
   );

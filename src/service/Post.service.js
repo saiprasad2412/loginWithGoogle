@@ -6,11 +6,10 @@ export const getAllPosts = async (limit, page) => {
     const res = await axios.get(
       `http://localhost:8080/feed/posts?_limit=${limit}&_page=${page}`
     );
-    console.log("Posts fetched successfully:", res.data);
-    return res?.data; // Return posts data
+    return res?.data;
   } catch (error) {
     console.error("Error while fetching posts:", error);
-    return { error: error.message }; // Return error message for better error handling
+    return { error: error.message };
   }
 };
 
@@ -20,7 +19,6 @@ export const createPost = async (content, files, id) => {
   formData.append("content", content);
   formData.append("id", id);
 
-  // Append all files to FormData
   files.forEach((file) => formData.append("files", file));
 
   try {
@@ -29,15 +27,14 @@ export const createPost = async (content, files, id) => {
       formData,
       {
         headers: {
-          "Content-Type": "multipart/form-data", // Ensure correct content type
+          "Content-Type": "multipart/form-data", 
         },
       }
     );
-    console.log("Post created successfully:", response.data);
-    return response.data; // Return response data
+    return response.data;
   } catch (error) {
     console.error("Error while creating post:", error);
-    throw error; // Re-throw the error for proper error handling in the component
+    throw error;
   }
 };
 
@@ -51,9 +48,7 @@ export const getPostofCreator= async(id)=>{
   }
 }
 
-export const handleLikeFn= async(postId, userId)=>{
-  console.log('userid',userId);
-  
+export const handleLikeFn= async(postId, userId)=>{  
   const res=await axios.put(`http://localhost:8080/feed/posts/:${postId}/like`,{userId});
   return res;
 }

@@ -188,10 +188,9 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
-
-      {/* Floating Add Button */}
-      <button className="fixed bottom-8 right-8 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800">
+      <button className="fixed bottom-8 right-8 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800" onClick={()=>{navigate('/new-post')}}>
         <MdAdd size={24} />
+
       </button>
     </div>
   );

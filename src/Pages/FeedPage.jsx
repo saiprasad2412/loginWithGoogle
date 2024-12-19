@@ -14,7 +14,6 @@ const FeedPage = () => {
   const getFeedDataFn = async (limit, page) => {
     try {
       const data = await getAllPosts(limit, page);
-      console.log({ data })
       setTotalCount(data.totalPosts);
       setFeedData((prevData) => [...prevData, ...data.posts]);
 
@@ -34,22 +33,7 @@ const FeedPage = () => {
         console.error("User ID not found");
         return;
       }
-  
-      // Await the response from the like API
       const response = await handleLikeFn(postId, userId);
-      console.log("Like response:", response);
-  
-      // Update the feedData state to reflect the new likes count
-      // setFeedData((prevData) =>
-      //   prevData.map((post) =>
-      //     post._id === postId
-      //       ? {
-      //           ...post,
-      //           likes: response.likes, 
-      //         }
-      //       : post
-      //   )
-      // );
     } catch (error) {
       console.error("Error while liking the post:", error);
     }
@@ -60,9 +44,6 @@ const FeedPage = () => {
   useEffect(() => {
     getFeedDataFn(20,page);
   }, [])
-  // useEffect(() => {
-  //   getFeedDataFn(1,page);
-  // }, [onupdateFlag])
 
   return (
     <div
@@ -74,20 +55,17 @@ const FeedPage = () => {
         flexDirection: 'column',
       }}
     >
-      {/*Put the scroll bar always on the bottom*/}
       <InfiniteScroll
         dataLength={feedData.length}
         next={() => {
           setPage(page+1);
           getFeedDataFn(20, page + 1);
         }}
-        style={{ display: 'flex', flexDirection: 'column' }} //To put endMessage and loader to the top.
+        style={{ display: 'flex', flexDirection: 'column' }} 
         hasMore={totalCount !== feedData.length}
         loader={<h4>Loading...</h4>}
         scrollableTarget="scrollableDiv"
       >
-        {console.log('feeddata',feedData)
-        }
         {feedData.map((post, index) => (
           
 
