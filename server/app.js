@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
-import connectDB from "./db/connection.js"; // Assuming this initializes your MongoDB connection
+import connectDB from "./db/connection.js";
 import postsRoutes from "./routes/Posts.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js"
@@ -27,7 +27,6 @@ app.use(
   })
 );
 
-// app.use(express.json());
 connectDB();
 app.use(express.json({ limit: "10mb" })); // Adjust size limit as needed
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -56,12 +55,11 @@ const clientId = process.env.CLIENTID;
 const clientSecret = process.env.CLIENTSECRET;
 configureGoogleAuth(clientId, clientSecret);
 
-// Use the authentication routes
+//routes
 app.use("/feed", postsRoutes);
 app.use("/auth", authRoutes);  
 app.use('/users', userRouter)
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });

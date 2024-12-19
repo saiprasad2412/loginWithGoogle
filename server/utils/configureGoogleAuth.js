@@ -12,8 +12,6 @@ const configureGoogleAuth = (clientId, clientSecret) => {
         scope: ["email", "profile"],
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log("Profile:", profile);
-
         try {
           const existingUser = await userDB.findOne({ googleId: profile.id });
           if (existingUser) {
