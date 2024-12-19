@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import moment from "moment";
 import Modal from "react-modal";
 import {
@@ -15,9 +15,16 @@ Modal.setAppElement("#root");
 const FeedCard = ({ post, loggedInUserId, handleLike ,onupdateFlag,setOnupdateFlag}) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const sliderRef = useRef(null);
+  const[isLiked , setIsLiked]=useState(false);
+  const userId=JSON.parse(localStorage.getItem('user'))._id;
 
   const postUrl = `http://localhost:3000/posts/${post._id}`;
+console.log('post data in card',post);
 
+useEffect(()=>{
+  // post.likes[userId]
+  setIsLiked(post?.likes?.includes(userId))
+},[])
   // Media slider scroll function
   const scrollMedia = (direction) => {
     if (sliderRef.current) {
@@ -108,13 +115,14 @@ const FeedCard = ({ post, loggedInUserId, handleLike ,onupdateFlag,setOnupdateFl
           <div className="flex items-center space-x-4">
             <button
               onClick={() => {
+                setIsLiked(!isLiked);
                 handleLike(post._id).then(()=>{
                   setOnupdateFlag(prev=>!prev);
                 })
               }}
               className="text-red-500 p-2 rounded-full hover:bg-gray-200 transition-all"
             >
-              {post.likes?.includes(loggedInUserId) ? (
+              {isLiked ? (
                 <MdFavorite size={24} />
               ) : (
                 <MdFavoriteBorder size={24} />

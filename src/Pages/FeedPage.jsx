@@ -40,25 +40,29 @@ const FeedPage = () => {
       console.log("Like response:", response);
   
       // Update the feedData state to reflect the new likes count
-      setFeedData((prevData) =>
-        prevData.map((post) =>
-          post._id === postId
-            ? { ...post, likes: response.likes } // Update likes array
-            : post
-        )
-      );
+      // setFeedData((prevData) =>
+      //   prevData.map((post) =>
+      //     post._id === postId
+      //       ? {
+      //           ...post,
+      //           likes: response.likes, 
+      //         }
+      //       : post
+      //   )
+      // );
     } catch (error) {
       console.error("Error while liking the post:", error);
     }
   };
   
+  
 
   useEffect(() => {
     getFeedDataFn(20,page);
   }, [])
-  useEffect(() => {
-    getFeedDataFn(20,page);
-  }, [onupdateFlag])
+  // useEffect(() => {
+  //   getFeedDataFn(1,page);
+  // }, [onupdateFlag])
 
   return (
     <div
@@ -82,6 +86,8 @@ const FeedPage = () => {
         loader={<h4>Loading...</h4>}
         scrollableTarget="scrollableDiv"
       >
+        {console.log('feeddata',feedData)
+        }
         {feedData.map((post, index) => (
           
 

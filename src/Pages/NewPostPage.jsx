@@ -1,29 +1,32 @@
-// src/pages/NewPostPage.js
-
 import React, { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { createPost } from "../service/Post.service";
 
 const NewPostPage = () => {
   const [postContent, setPostContent] = useState("");
-  const [files, setFiles] = useState([]); // Store file objects
-  const [previewUrls, setPreviewUrls] = useState([]); // Preview URLs for slider
-  const [currentIndex, setCurrentIndex] = useState(0); // Slider index
-  const [isLoading, setIsLoading] = useState(false); // To show loading state
-  const [error, setError] = useState(null); // To show error messages
+  const [files, setFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  // Handle file selection and generate previews
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files); // Convert FileList to Array
-    const newFiles = [...files, ...selectedFiles];
-    setFiles(newFiles);
+  const navigate = useNavigate(); // Initialize useNavigate
 
-    const newFileUrls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setPreviewUrls([...previewUrls, ...newFileUrls]);
-    setCurrentIndex(0); // Reset slider index to first item
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+
+    const newFileData = selectedFiles.map((file) => ({
+      url: URL.createObjectURL(file),
+      type: file.type,
+    }));
+
+    setFiles([...files, ...selectedFiles]);
+    setPreviewUrls([...previewUrls, ...newFileData]);
+    setCurrentIndex(0);
   };
-  // Delete current image
+
   const handleDeleteImage = () => {
     const updatedFiles = files.filter((_, index) => index !== currentIndex);
     const updatedUrls = previewUrls.filter((_, index) => index !== currentIndex);
@@ -31,7 +34,6 @@ const NewPostPage = () => {
     setFiles(updatedFiles);
     setPreviewUrls(updatedUrls);
 
-    // Adjust current index after deletion
     if (currentIndex >= updatedUrls.length && updatedUrls.length > 0) {
       setCurrentIndex(updatedUrls.length - 1);
     } else {
@@ -39,7 +41,6 @@ const NewPostPage = () => {
     }
   };
 
-  // Slider Navigation
   const goToPrev = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? previewUrls.length - 1 : prevIndex - 1
@@ -50,7 +51,6 @@ const NewPostPage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % previewUrls.length);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -59,34 +59,35 @@ const NewPostPage = () => {
       return;
     }
 
-    setIsLoading(true); // Set loading state
-    setError(null); // Clear previous errors
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await createPost(postContent, files ,userId); // Call the service function
+      const response = await createPost(postContent, files, userId);
 
-      // Handle successful post creation
       console.log("Post created successfully:", response);
       alert("Post created successfully!");
-      setPostContent(""); // Reset content
-      setFiles([]); // Reset files
-      setPreviewUrls([]); // Reset preview URLs
+      setPostContent("");
+      setFiles([]);
+      setPreviewUrls([]);
+      
+      navigate("/dashboard"); // Redirect to /dashboard
     } catch (error) {
       console.error("Error creating post:", error);
       setError("Failed to create post. Please try again.");
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
-  useEffect(()=>{
-    const user=localStorage.getItem("user");
-    if(user){
-      const userData=JSON.parse(user)
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const userData = JSON.parse(user);
       setUserId(userData._id);
-      console.log('user==>',userData._id);
-      
+      console.log("user==>", userData._id);
     }
-  },[]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-gray-50">
@@ -102,22 +103,20 @@ const NewPostPage = () => {
         {/* Media Preview Slider */}
         {previewUrls.length > 0 && (
           <div className="relative w-full h-64 mb-4 bg-gray-100 rounded-lg overflow-hidden">
-            {/* Display Image or Video */}
-            {previewUrls[currentIndex].includes("video") ? (
+            {previewUrls[currentIndex]?.type.startsWith("video") ? (
               <video
-                src={previewUrls[currentIndex]}
+                src={previewUrls[currentIndex].url}
                 controls
                 className="w-full h-full object-cover"
               />
             ) : (
               <img
-                src={previewUrls[currentIndex]}
+                src={previewUrls[currentIndex].url}
                 alt="Preview"
                 className="w-full h-full object-cover"
               />
             )}
 
-            {/* Slider Navigation */}
             {previewUrls.length > 1 && (
               <>
                 <button
@@ -135,12 +134,10 @@ const NewPostPage = () => {
               </>
             )}
 
-            {/* Image Counter */}
             <div className="absolute top-2 right-2 bg-white text-black px-2 py-1 rounded text-sm font-semibold shadow">
               {currentIndex + 1} / {previewUrls.length}
             </div>
 
-            {/* Delete Button */}
             <button
               onClick={handleDeleteImage}
               className="absolute bottom-2 right-2 bg-transparent p-2 rounded-full"
@@ -150,7 +147,6 @@ const NewPostPage = () => {
           </div>
         )}
 
-        {/* Post Input */}
         <div className="bg-gray-100 rounded-lg p-4 mb-4 shadow">
           <textarea
             placeholder="What's on your mind?"
@@ -160,7 +156,6 @@ const NewPostPage = () => {
           />
         </div>
 
-        {/* File Upload */}
         {files.length === 0 ? (
           <div className="space-y-4 mb-4">
             <label
@@ -204,7 +199,6 @@ const NewPostPage = () => {
           </div>
         )}
 
-        {/* Submit Button */}
         <button
           onClick={handleSubmit}
           className={`w-full bg-black text-white font-bold py-2 rounded-full hover:bg-gray-800 transition ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
